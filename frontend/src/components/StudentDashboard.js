@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './StudentDashboard.css';
@@ -10,18 +10,18 @@ function StudentDashboard({ user, setUser }) {
   const [newGrievance, setNewGrievance] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchGrievances();
-  }, []);
-
-  const fetchGrievances = async () => {
+  const fetchGrievances = useCallback(async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/api/grievances`);
       setGrievances(response.data.filter(grievance => grievance.student.id === user.id));
     } catch (error) {
       console.error('Failed to fetch grievances', error);
     }
-  };
+  }, [user.id]);
+
+  useEffect(() => {
+    fetchGrievances();
+  }, [fetchGrievances]);
 
   const addGrievance = async (e) => {
     e.preventDefault();
@@ -40,10 +40,10 @@ function StudentDashboard({ user, setUser }) {
 
   return (
     <div className="student-dashboard">
-      <h1>Welcome, <span className='user-name-student'>{user.username}!</span></h1>
+      <h1 className='welcome'>Welcome, <span className='user-name-student'>{user.username}!</span></h1>
       
       <div className="grievance-section">
-        <h2>Add New Grievance</h2>
+        <h2 className='add'>Add New Grievance</h2>
         <form onSubmit={addGrievance} className="grievance-form">
           <textarea
             value={newGrievance}
@@ -67,9 +67,10 @@ function StudentDashboard({ user, setUser }) {
               <p><strong>Description:</strong> {grievance.description}</p>
               <p><strong>Status:</strong> <span className={`status ${grievance.status.toLowerCase()}`}>{grievance.status}</span></p>
             </div>
-          ))
+          ))                                                                                     
         )}
       </div>
+      <div className='logoutuser'><button className='logout3' onClick={()=>navigate('/')}>Logout</button></div>
     </div>
   );
 }

@@ -17,6 +17,7 @@ function Login({ setUser }) {
         params: { username, password }
       });
       setUser(response.data);
+      console.log(response.data.role);
       switch (response.data.role) {
         case 'STUDENT':
           navigate('/student');
@@ -41,7 +42,9 @@ function Login({ setUser }) {
   };
 
   return (
+
   <div className="login-container">
+       <h1 className="title1">Grievance Redressal Cell</h1>
     <form onSubmit={handleSubmit}>
       <input
         type="text"

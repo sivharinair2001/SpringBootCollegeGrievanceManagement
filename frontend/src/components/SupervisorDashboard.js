@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './SupervisorDashboard.css';
+import { useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -9,12 +10,7 @@ function SupervisorDashboard({ user }) {
   const [assignees, setAssignees] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [editingUserId, setEditingUserId] = useState(null);
-
-  useEffect(() => {
-    fetchGrievances();
-    fetchAssignees();
-    fetchAllUsers();
-  }, []);
+  const navigate = useNavigate();
 
   const fetchGrievances = async () => {
     try {
@@ -43,6 +39,12 @@ function SupervisorDashboard({ user }) {
     }
   };
 
+  useEffect(() => {
+    fetchGrievances();
+    fetchAssignees();
+    fetchAllUsers();
+  }, []);
+
   const assignGrievance = async (grievanceId, assigneeId) => {
     try {
       await axios.post(`${API_BASE_URL}/api/grievances/assign/${grievanceId}`, { id: assigneeId });
@@ -62,6 +64,17 @@ function SupervisorDashboard({ user }) {
     }
   };
 
+  const deleteGrievance = async (grievanceId) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/api/grievances/delete/${grievanceId}`);
+      fetchGrievances(); // Refresh grievances list after deletion
+      alert('Grievance deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete grievance', error);
+      alert('Failed to delete grievance');
+    }
+  };
+
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/api/users/delete/${id}`);
@@ -72,7 +85,6 @@ function SupervisorDashboard({ user }) {
       alert('Failed to delete user');
     }
   };
-  
 
   const toggleRoleDropdown = (userId) => {
     console.log("Edit button clicked for userId:", userId);
@@ -83,23 +95,24 @@ function SupervisorDashboard({ user }) {
     <div className="supervisor-dashboard">
       <h1>Supervisor Dashboard</h1>
 
-      <div className="grievances-list">
+      <div className="grievances-list1">
         <h2>All Grievances</h2>
         {grievances.map(grievance => (
-          <div key={grievance.id} className="grievance-item">
+          <div key={grievance.id} className="grievance-item1">
             <p><strong>Description:</strong> {grievance.description}</p>
             <p><strong>Status:</strong> <span className={`status-${grievance.status.toLowerCase().replace(' ', '-')}`}>{grievance.status}</span></p>
             <p><strong>Assigned to:</strong> {grievance.assignee ? grievance.assignee.username : 'Not Assigned'}</p>
             <select 
               onChange={(e) => assignGrievance(grievance.id, e.target.value)} 
               defaultValue={grievance.assignee ? grievance.assignee.id : ""} 
-              disabled={!!grievance.assignee} // Disable dropdown if the grievance is already assigned
+              disabled={!!grievance.assignee} // Disable dropdown if grievance is already assigned
             >
               <option value="" disabled>Assign to...</option>
               {assignees.map(assignee => (
                 <option key={assignee.id} value={assignee.id}>{assignee.username}</option>
               ))}
             </select>
+            <button className='delete-button' onClick={() => deleteGrievance(grievance.id)}>🗑️</button> {/* Delete button */}
           </div>
         ))}
       </div>
@@ -112,9 +125,14 @@ function SupervisorDashboard({ user }) {
               <p className="username">UserName: {user.username}</p>
               <div className="role-container">
                 <p className="role">{user.role}</p>
-                <button className="edit-button" onClick={() => toggleRoleDropdown(user.id)}>
-                  ✎
-                </button>
+                <div className='icon-buttons'>
+                  <button className="edit-button" onClick={() => toggleRoleDropdown(user.id)}>
+                    ✎
+                  </button>
+                  <button className="delete-button" onClick={() => handleDelete(user.id)}>
+                    🗑️
+                  </button>
+                </div>
                 {editingUserId === user.id && (
                   <div className="role-select">
                     <select 
@@ -129,11 +147,12 @@ function SupervisorDashboard({ user }) {
                 )}
               </div>
             </div>
-            <button className="delete-button" onClick={() => handleDelete(user.id)}>
-              🗑️
-            </button>
           </div>
         ))}
+      </div>
+
+      <div className='superlogout'>
+        <button className='logout1' onClick={() => navigate('/')}>Logout</button>
       </div>
     </div>
   );

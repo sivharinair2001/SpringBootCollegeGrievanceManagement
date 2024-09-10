@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import './Register.css';
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -26,6 +27,9 @@ function Register() {
   };
 
   return (
+    <div className="login-container">
+    <h1 className="title1">Grievance Redressal Cell</h1>
+  <div className="login-form">
     <form onSubmit={handleRegister}>
       <input
         type="text"
@@ -43,6 +47,8 @@ function Register() {
       />
       <button type="submit">Register</button>
     </form>
+    </div>
+    </div>
   );
 }
 
